@@ -26,17 +26,6 @@ def get_data_from_excel():
 df = get_data_from_excel()
 
 st.sidebar.header("Filtros")
-nombre = st.sidebar.multiselect(
-		label="Nombre",
-		options=df["Nombres "].unique(),
-		default=df["Nombres "].unique()
-)
-
-departamento = st.sidebar.multiselect(
-		label="Departamento",
-		options=df["Departamento de residencia"].unique(),
-		default=df["Departamento de residencia"].unique()
-)
 
 postgrado = st.sidebar.multiselect(
 		label="Postgrado",
@@ -50,9 +39,22 @@ seguimiento = st.sidebar.multiselect(
 		default=df["Seguimiento del proyecto"].unique()
 )
 
-df_selection = df.query(
-		"`Nombres ` in @nombre and `Departamento de residencia` in @departamento and `Postgrado (s) obtenido (s)` in @postgrado and `Seguimiento del proyecto` in @seguimiento"
+departamento = st.sidebar.multiselect(
+		label="Departamento",
+		options=df["Departamento de residencia"].unique(),
+		default=df["Departamento de residencia"].unique()
 )
+
+
+
+df_selection = df.query(
+		"`Departamento de residencia` in @departamento and `Postgrado (s) obtenido (s)` in @postgrado and `Seguimiento del proyecto` in @seguimiento"
+)
+
+#If query is empty, show all data
+if df_selection.empty:
+	st.warning("No hay datos para mostrar. Por favor, seleccione otros filtros.")
+	df_selection = df
 
 # -- MainPage --
 
@@ -93,7 +95,6 @@ estudiantes_departamento_chart = px.bar(
 		orientation="h",
 		color_discrete_sequence=["#0083B8"] * len(estudiantes_por_departamento),
 		template="plotly_white",
-
 )
 
 estudiantes_departamento_chart.update_layout(
@@ -107,8 +108,6 @@ estudiantes_departamento_chart.update_layout(
 		ticks="outside",
 	),
 )
-
-# st.plotly_chart(estudiantes_departamento_chart)
 
 #Segundo Chart - Estudiantes por postgrado
 postragos_por_mes = (
